@@ -1,0 +1,46 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Production {
+  id               Int     @id @default(autoincrement())
+  plant            String
+  month            Int
+  year             Int
+  productionTarget Decimal @map("production_target") @db.Decimal(18, 2)
+  productionActual Decimal @map("production_actual") @db.Decimal(18, 2)
+
+  @@index([plant, year, month])
+  @@map("production")
+}
+
+model Revenue {
+  id            Int     @id @default(autoincrement())
+  plant         String
+  month         Int
+  year          Int
+  revenueTarget Decimal @map("revenue_target") @db.Decimal(18, 2)
+  revenueActual Decimal @map("revenue_actual") @db.Decimal(18, 2)
+
+  @@index([plant, year, month])
+  @@map("revenue")
+}
+
+model Lop {
+  id            Int     @id @default(autoincrement())
+  plant         String
+  month         Int
+  year          Int
+  lopHour       Decimal @map("lop_hour") @db.Decimal(18, 2)
+  lopProduction Decimal @map("lop_production") @db.Decimal(18, 2)
+  lopRevenue    Decimal @map("lop_revenue") @db.Decimal(18, 2)
+
+  @@index([plant, year, month])
+  @@map("lop")
+}
+
