@@ -1,12 +1,16 @@
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #0b1020;
+  --foreground: #e8eefc;
 }
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: #0b1020;
+    --foreground: #e8eefc;
   }
 }
 
@@ -26,7 +30,8 @@ body {
   flex-direction: column;
   color: var(--foreground);
   background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-geist-sans), ui-sans-serif, system-ui, -apple-system,
+    Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -46,4 +51,11 @@ a {
   html {
     color-scheme: dark;
   }
+}
+
+.glass {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
 }

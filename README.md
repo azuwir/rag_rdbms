@@ -34,6 +34,7 @@ cp .env.example .env
 
 Edit `.env`:
 - `DATABASE_URL`
+- `AUTH_SECRET` (untuk session auth)
 - `SUMOPOD_API_KEY`
 - (opsional) `SUMOPOD_MODEL` (default: `gpt-4o-mini`)
 - (opsional) `SUMOPOD_BASE_URL` (default: `https://ai.sumopod.com/v1`)

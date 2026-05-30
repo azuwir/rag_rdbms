@@ -3,6 +3,7 @@ import { z } from "zod";
 
 const SqlGenSchema = z.object({
   sql: z.string(),
+  chart_sql: z.string().optional(),
   note: z.string().optional(),
 });
 
@@ -42,12 +43,25 @@ export async function generateSql(question: string): Promise<SqlGenResult> {
     "- lop(id, plant, month, year, lop_hour, lop_production, lop_revenue)",
     "",
     "Aturan WAJIB:",
-    "1) Output HARUS JSON valid: {\"sql\":\"...\",\"note\":\"...\"}.",
-    "2) Hanya buat 1 query SQL dan HARUS diawali SELECT.",
+    "1) Output HARUS JSON valid: {\"sql\":\"...\",\"chart_sql\":\"...\",\"note\":\"...\"}. Field chart_sql boleh null/undefined tapi usahakan selalu diisi untuk production/revenue/lop.",
+    "2) Semua query HARUS diawali SELECT.",
     "3) Jangan pakai komentar, jangan pakai titik koma (;), jangan DDL/DML.",
     "4) Gunakan nama tabel persis: production, revenue, lop.",
     "5) Jika pertanyaan meminta ringkasan, gunakan agregasi (SUM/AVG) dan GROUP BY seperlunya.",
     "6) Jika user menyebut plant/bulan/tahun, gunakan filter WHERE (plant, month, year).",
+    "",
+    "ATURAN KHUSUS chart_sql (untuk menampilkan chart otomatis):",
+    "- chart_sql harus menghasilkan data time-series / category-series yang mudah di-chart, MINIMAL 2 baris jika memungkinkan.",
+    "- Pilih pola berikut (prioritas):",
+    "  a) Jika user menyebut month (bulan) DAN year: buat chart per-plant untuk bulan tsb (GROUP BY plant).",
+    "  b) Jika user menyebut year (tanpa month): buat chart per-month untuk year tsb (GROUP BY month).",
+    "  c) Jika hanya plant disebut (tanpa year): buat chart per-year (GROUP BY year).",
+    "  d) Jika tidak ada filter: buat chart per-month untuk 2 tahun terbaru (GROUP BY year, month).",
+    "- Untuk PRODUCTION: pilih metrik production_target, production_actual (SUM) dan sertakan kolom dimensi (month/year/plant).",
+    "- Untuk REVENUE: metrik revenue_target, revenue_actual (SUM).",
+    "- Untuk LOP: metrik lop_hour, lop_production, lop_revenue (SUM).",
+    "- Beri alias kolom metrik sesuai nama aslinya (mis. SUM(production_target) AS production_target).",
+    "- Tambahkan ORDER BY dimensi (mis. year, month atau plant).",
   ].join("\n");
 
   const resp = await openai.chat.completions.create({

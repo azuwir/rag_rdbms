@@ -10,6 +10,7 @@
  */
 
 const { PrismaClient } = require("@prisma/client");
+const bcrypt = require("bcryptjs");
 
 const prisma = new PrismaClient();
 
@@ -102,6 +103,22 @@ async function main() {
 
   console.log(`Seeding data untuk tahun ${fromYear}-${toYear}...`);
 
+  // Seed 2 users (idempotent via upsert)
+  console.log("Seeding users (2 akun)...");
+  const users = [
+    { name: "Admin", email: "admin@demo.local", password: "Admin123!" },
+    { name: "Analyst", email: "analyst@demo.local", password: "Analyst123!" },
+  ];
+
+  for (const u of users) {
+    const passwordHash = await bcrypt.hash(u.password, 10);
+    await prisma.user.upsert({
+      where: { email: u.email },
+      update: { name: u.name, passwordHash },
+      create: { name: u.name, email: u.email, passwordHash },
+    });
+  }
+
   // Bersihkan data existing pada rentang tahun target (idempotent-ish)
   await prisma.lop.deleteMany({ where: { year: { in: YEARS } } });
   await prisma.revenue.deleteMany({ where: { year: { in: YEARS } } });
@@ -134,6 +151,7 @@ async function main() {
   console.log(
     `Selesai. Inserted: production=${productionRows.length}, revenue=${revenueRows.length}, lop=${lopRows.length}`
   );
+  console.log("Users seeded: admin@demo.local / Admin123!, analyst@demo.local / Analyst123!");
 }
 
 main()

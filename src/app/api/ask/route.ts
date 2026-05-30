@@ -17,6 +17,19 @@ export async function POST(req: Request) {
 
     const rows = (await prisma.$queryRawUnsafe(safeSql)) as unknown[];
 
+    let chartSql: string | null = null;
+    let chartRows: unknown[] | null = null;
+    if (sqlGen.chart_sql) {
+      try {
+        chartSql = ensureLimit(enforceSelectOnly(sqlGen.chart_sql), 200);
+        chartRows = (await prisma.$queryRawUnsafe(chartSql)) as unknown[];
+      } catch {
+        // Jika chart_sql gagal, jangan gagalkan request utama.
+        chartSql = null;
+        chartRows = null;
+      }
+    }
+
     const answer = await generateAnswer({
       question: body.question,
       sql: safeSql,
@@ -27,8 +40,10 @@ export async function POST(req: Request) {
       ok: true,
       question: body.question,
       sql: safeSql,
+      chartSql,
       note: sqlGen.note ?? null,
       rows,
+      chartRows,
       answer,
     });
   } catch (err) {
@@ -36,4 +51,3 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: false, error: message }, { status: 400 });
   }
 }
-
